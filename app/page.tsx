@@ -408,7 +408,7 @@ export default function Home() {
                   ? 'text-gray-300 hover:text-white'
                   : 'text-gray-600 hover:text-gray-900'
                   }`}>
-                  Today's Quote
+                  Todays Quote
                 </a>
                 <a href="#" className={`transition-colors duration-300 ${isDarkMode
                   ? 'text-gray-300 hover:text-white'
