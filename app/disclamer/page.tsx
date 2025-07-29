@@ -6,7 +6,7 @@ const Disclaimer: React.FC = () => {
     <>
       <Head>
         <title>Disclaimer - ChillTube</title>
-        <meta name="description" content="ChillTube's Disclaimer - Important information about the use of our streaming platform and motivational content." />
+        <meta name="description" content="ChillTube&apos;s Disclaimer - Important information about the use of our streaming platform and motivational content." />
       </Head>
       
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -22,7 +22,7 @@ const Disclaimer: React.FC = () => {
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">General Disclaimer</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                The information contained on ChillTube's platform is for general information purposes only. 
+                The information contained on ChillTube&apos;s platform is for general information purposes only. 
                 While we endeavor to keep the information up to date and correct, we make no representations 
                 or warranties of any kind, express or implied, about the completeness, accuracy, reliability, 
                 suitability, or availability with respect to the platform or the information, products, 
@@ -150,7 +150,7 @@ const Disclaimer: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Age Restrictions</h2>
               <p className="text-gray-700">
                 ChillTube is intended for users aged 13 and above. While we curate content to be generally 
-                appropriate and positive, parents and guardians should supervise minors' use of our platform. 
+                appropriate and positive, parents and guardians should supervise minors&apos; use of our platform. 
                 We are not responsible for ensuring that all content is suitable for viewers of all ages, 
                 and parental discretion is advised.
               </p>

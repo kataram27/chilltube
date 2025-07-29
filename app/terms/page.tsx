@@ -6,7 +6,7 @@ const TermsAndConditions: React.FC = () => {
     <>
       <Head>
         <title>Terms and Conditions - ChillTube</title>
-        <meta name="description" content="ChillTube's Terms and Conditions - The legal agreement between you and ChillTube governing your use of our platform." />
+        <meta name="description" content="ChillTube&apos;s Terms and Conditions - The legal agreement between you and ChillTube governing your use of our platform." />
       </Head>
       
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -22,9 +22,9 @@ const TermsAndConditions: React.FC = () => {
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Agreement to Terms</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                These Terms and Conditions ("Terms") constitute a legally binding agreement made between 
-                you, whether personally or on behalf of an entity ("you"), and ChillTube ("Company," "we," 
-                "us," or "our"), concerning your access to and use of the ChillTube platform and all 
+                These Terms and Conditions (&quot;Terms&quot;) constitute a legally binding agreement made between 
+                you, whether personally or on behalf of an entity (&quot;you&quot;), and ChillTube (&quot;Company,&quot; &quot;we,&quot; 
+                &quot;us,&quot; or &quot;our&quot;), concerning your access to and use of the ChillTube platform and all 
                 related services, features, and content.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
@@ -45,19 +45,19 @@ const TermsAndConditions: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Definitions</h2>
               <div className="space-y-3">
                 <div>
-                  <span className="font-medium text-gray-900">"Platform"</span>
+                  <span className="font-medium text-gray-900">&quot;Platform&quot;</span>
                   <span className="text-gray-700"> refers to the ChillTube website, mobile applications, and all related services.</span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-900">"Content"</span>
+                  <span className="font-medium text-gray-900">&quot;Content&quot;</span>
                   <span className="text-gray-700"> includes all streaming videos, motivational quotes, text, images, audio, and other materials available on the platform.</span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-900">"User Account"</span>
+                  <span className="font-medium text-gray-900">&quot;User Account&quot;</span>
                   <span className="text-gray-700"> refers to the registered account created by users to access our services.</span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-900">"Subscription"</span>
+                  <span className="font-medium text-gray-900">&quot;Subscription&quot;</span>
                   <span className="text-gray-700"> refers to the paid access plans that provide enhanced features and content.</span>
                 </div>
               </div>
@@ -124,7 +124,7 @@ const TermsAndConditions: React.FC = () => {
               <ul className="list-disc pl-6 text-gray-700 space-y-1 mb-4">
                 <li>Subscription fees are billed in advance on a recurring basis</li>
                 <li>All payments are non-refundable except as required by law</li>
-                <li>We reserve the right to change subscription fees with 30 days' notice</li>
+                <li>We reserve the right to change subscription fees with 30 days&apos; notice</li>
                 <li>Failed payments may result in suspension or termination of your account</li>
               </ul>
 
@@ -159,7 +159,7 @@ const TermsAndConditions: React.FC = () => {
                 <li>To impersonate any person or entity</li>
                 <li>To infringe upon intellectual property rights</li>
                 <li>To attempt to gain unauthorized access to our systems</li>
-                <li>To interfere with other users' enjoyment of the platform</li>
+                <li>To interfere with other users&apos; enjoyment of the platform</li>
               </ul>
             </section>
 
@@ -212,7 +212,7 @@ const TermsAndConditions: React.FC = () => {
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Disclaimers</h2>
               <p className="text-gray-700 mb-4">
-                ChillTube is provided on an "as is" and "as available" basis. We make no representations 
+                ChillTube is provided on an &quot;as is&quot; and &quot;as available&quot; basis. We make no representations 
                 or warranties of any kind, express or implied, regarding:
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-1 mb-4">
@@ -253,7 +253,7 @@ const TermsAndConditions: React.FC = () => {
                 You agree to defend, indemnify, and hold harmless ChillTube and its employees, 
                 contractors, agents, officers, and directors from and against any and all claims, 
                 damages, obligations, losses, liabilities, costs, or debt, and expenses (including 
-                but not limited to attorney's fees) arising from your use of the platform or 
+                but not limited to attorney&apos;s fees) arising from your use of the platform or 
                 violation of these Terms.
               </p>
             </section>
@@ -289,7 +289,7 @@ const TermsAndConditions: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to Terms</h2>
               <p className="text-gray-700">
                 We reserve the right to modify or replace these Terms at any time. If a revision is 
-                material, we will try to provide at least 30 days' notice prior to any new terms 
+                material, we will try to provide at least 30 days&apos; notice prior to any new terms 
                 taking effect. Your continued use of the platform after such modifications constitutes 
                 acceptance of the updated Terms.
               </p>

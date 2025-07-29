@@ -34,7 +34,7 @@ const ContactUs: React.FC = () => {
     
     // Simulate form submission
     setTimeout(() => {
-      setSubmitMessage('Thank you for your message! We\'ll get back to you within 24 hours.');
+      setSubmitMessage('Thank you for your message! We&apos;ll get back to you within 24 hours.');
       setFormData({ name: '', email: '', subject: '', message: '' });
       setIsSubmitting(false);
     }, 1000);
@@ -52,7 +52,7 @@ const ContactUs: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-            <p className="text-xl text-gray-600">We'd love to hear from you. Send us a message!</p>
+            <p className="text-xl text-gray-600">We&apos;d love to hear from you. Send us a message!</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
@@ -108,11 +108,11 @@ const ContactUs: React.FC = () => {
                 <div className="space-y-3 text-sm">
                   <div>
                     <p className="font-medium text-gray-700">How do I report a technical issue?</p>
-                    <p className="text-gray-600">Please use the contact form and select "Technical Support" as your subject.</p>
+                    <p className="text-gray-600">Please use the contact form and select &quot;Technical Support&quot; as your subject.</p>
                   </div>
                   <div>
                     <p className="font-medium text-gray-700">Can I suggest content?</p>
-                    <p className="text-gray-600">Yes! We love content suggestions. Use "Content Suggestion" as your subject.</p>
+                    <p className="text-gray-600">Yes! We love content suggestions. Use &quot;Content Suggestion&quot; as your subject.</p>
                   </div>
                   <div>
                     <p className="font-medium text-gray-700">How do I cancel my subscription?</p>

@@ -6,7 +6,7 @@ const PrivacyPolicy: React.FC = () => {
     <>
       <Head>
         <title>Privacy Policy - ChillTube</title>
-        <meta name="description" content="ChillTube's Privacy Policy - Learn how we collect, use, and protect your personal information." />
+        <meta name="description" content="ChillTube&apos;s Privacy Policy - Learn how we collect, use, and protect your personal information." />
       </Head>
       
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -22,7 +22,7 @@ const PrivacyPolicy: React.FC = () => {
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
               <p className="text-gray-700 leading-relaxed">
-                ChillTube ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy 
+                ChillTube (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy 
                 explains how we collect, use, disclose, and safeguard your information when you visit our 
                 streaming platform and use our services. Please read this Privacy Policy carefully. If you 
                 do not agree with the terms of this Privacy Policy, please do not access the site.
@@ -158,7 +158,7 @@ const PrivacyPolicy: React.FC = () => {
 
             {/* Children's Privacy */}
             <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Children's Privacy</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Children&apos;s Privacy</h2>
               <p className="text-gray-700">
                 Our services are not intended for children under 13 years of age. We do not knowingly 
                 collect personal information from children under 13. If you are a parent or guardian and 
@@ -192,7 +192,7 @@ const PrivacyPolicy: React.FC = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to This Privacy Policy</h2>
               <p className="text-gray-700">
                 We may update this Privacy Policy from time to time. We will notify you of any changes by 
-                posting the new Privacy Policy on this page and updating the "Last updated" date. We encourage 
+                posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date. We encourage 
                 you to review this Privacy Policy periodically for any changes.
               </p>
             </section>

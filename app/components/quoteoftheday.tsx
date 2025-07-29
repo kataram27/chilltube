@@ -14,48 +14,48 @@ export default function QuoteOfTheDay() {
   const fetchQuote = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('Fetching quote from /api/quote...');
-      
+
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         }
       });
-      
+
       console.log('Response status:', response.status);
       console.log('Response headers:', response.headers);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Response error text:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
-      
+
       const responseText = await response.text();
       console.log('Raw response:', responseText);
-      
+
       let quoteData: Quote;
       try {
         quoteData = JSON.parse(responseText) as Quote;
-      } catch (parseError) {
+      } catch (parseError: unknown) {
         console.error('JSON parse error:', parseError);
         console.error('Response was:', responseText);
         throw new Error('Invalid JSON response from server');
       }
-      
+
       if (!quoteData.text || !quoteData.author || !quoteData.category) {
         throw new Error('Invalid quote data structure');
       }
-      
+
       setQuote({
         text: quoteData.text,
         author: quoteData.author,
         category: quoteData.category
       });
-      
+
     } catch (err: unknown) {
       console.error('Quote fetch failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -142,13 +142,13 @@ export default function QuoteOfTheDay() {
           {/* Quote Text */}
           <div className="relative">
             <svg className="absolute -top-4 -left-4 w-8 h-8 text-purple-500/30" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
             </svg>
             <blockquote className="text-xl md:text-2xl font-medium text-white leading-relaxed px-8 py-4">
               &quot;{quote.text}&quot;
             </blockquote>
             <svg className="absolute -bottom-4 -right-4 w-8 h-8 text-purple-500/30 rotate-180" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
             </svg>
           </div>
 
@@ -186,15 +186,16 @@ export default function QuoteOfTheDay() {
         </button>
       </div>
 
-      {/* Today's Date */}
+      {/* Today&apos;s Date */}
       <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
         <p className="text-gray-400 text-sm">
-          {new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+          {new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
           })}
+
         </p>
       </div>
     </div>

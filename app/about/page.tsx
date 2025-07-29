@@ -6,7 +6,7 @@ const AboutUs: React.FC = () => {
     <>
       <Head>
         <title>About Us - ChillTube</title>
-        <meta name="description" content="Learn about ChillTube's mission to provide inspiring content and daily motivation through our streaming platform." />
+        <meta name="description" content="Learn about ChillTube&apos;s mission to provide inspiring content and daily motivation through our streaming platform." />
       </Head>
       
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -27,7 +27,7 @@ const AboutUs: React.FC = () => {
               to help you stay focused, inspired, and entertained.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              Whether you're looking to unwind after a long day or seeking that spark of motivation to tackle 
+              Whether you&apos;re looking to unwind after a long day or seeking that spark of motivation to tackle 
               new challenges, ChillTube is here to support your journey with content that matters.
             </p>
           </div>
@@ -59,11 +59,11 @@ const AboutUs: React.FC = () => {
             <p className="text-gray-700 leading-relaxed mb-4">
               ChillTube was born from a simple observation: in a world filled with negative news and mindless content, 
               people crave platforms that nourish the mind and soul. Our founders recognized the need for a streaming 
-              service that doesn't just entertain, but also empowers and inspires its users.
+              service that doesn&apos;t just entertain, but also empowers and inspires its users.
             </p>
             <p className="text-gray-700 leading-relaxed">
               Starting as a passion project, ChillTube has grown into a community of individuals who believe in the 
-              power of positive content and daily motivation. We're committed to creating an environment where 
+              power of positive content and daily motivation. We&apos;re committed to creating an environment where 
               personal growth and entertainment go hand in hand.
             </p>
           </div>
@@ -97,7 +97,7 @@ const AboutUs: React.FC = () => {
                 <div className="flex-shrink-0 w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
                 <div>
                   <h3 className="font-medium text-gray-900">Innovation</h3>
-                  <p className="text-gray-600">We continuously evolve our platform to better serve our users' needs for inspiration and entertainment.</p>
+                  <p className="text-gray-600">We continuously evolve our platform to better serve our users&apos; needs for inspiration and entertainment.</p>
                 </div>
               </div>
             </div>
@@ -108,8 +108,8 @@ const AboutUs: React.FC = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Team</h2>
             <p className="text-gray-700 leading-relaxed">
               Our team consists of passionate individuals from diverse backgrounds in technology, content creation, 
-              and personal development. We're united by our shared vision of creating a platform that makes a 
-              positive impact on people's lives. From our developers who ensure a seamless user experience to our 
+              and personal development. We&apos;re united by our shared vision of creating a platform that makes a 
+              positive impact on people&apos;s lives. From our developers who ensure a seamless user experience to our 
               content curators who handpick every motivational quote, each team member contributes to making 
               ChillTube a special place on the internet.
             </p>
