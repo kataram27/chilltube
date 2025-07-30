@@ -26,40 +26,76 @@ export default function QuoteOfTheDay() {
       });
 
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      console.log('Response ok:', response.ok);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error text:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
+      // Even if status is not 200, try to get the response as JSON
+      // because our API always returns a valid quote
       const responseText = await response.text();
       console.log('Raw response:', responseText);
 
+      if (!responseText) {
+        throw new Error('Empty response from server');
+      }
+
       let quoteData: Quote;
       try {
-        quoteData = JSON.parse(responseText) as Quote;
+        const jsonData = JSON.parse(responseText);
+        
+        // Check if response contains an error (API failure)
+        if (jsonData.error) {
+          console.error('API returned error:', jsonData.error);
+          
+          // Use fallback if provided, otherwise create one
+          if (jsonData.fallback) {
+            quoteData = jsonData.fallback as Quote;
+            setError('API temporarily unavailable, showing cached quote');
+          } else {
+            throw new Error(jsonData.error);
+          }
+        } else {
+          quoteData = jsonData as Quote;
+        }
+        
+        console.log('Parsed quote data:', quoteData);
       } catch (parseError: unknown) {
         console.error('JSON parse error:', parseError);
         console.error('Response was:', responseText);
         throw new Error('Invalid JSON response from server');
       }
 
+      // Validate the quote structure
+      if (!quoteData || typeof quoteData !== 'object') {
+        throw new Error('Quote data is not an object');
+      }
+
       if (!quoteData.text || !quoteData.author || !quoteData.category) {
+        console.warn('Invalid quote structure:', quoteData);
         throw new Error('Invalid quote data structure');
       }
 
-      setQuote({
-        text: quoteData.text,
-        author: quoteData.author,
-        category: quoteData.category
-      });
+      // Clean up the quote data
+      const cleanQuote: Quote = {
+        text: String(quoteData.text).trim(),
+        author: String(quoteData.author).trim(),
+        category: String(quoteData.category).trim().toLowerCase()
+      };
+
+      console.log('✅ Setting quote:', cleanQuote);
+      setQuote(cleanQuote);
+      setError(null); // Clear any previous errors
 
     } catch (err: unknown) {
       console.error('Quote fetch failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(`Error: ${errorMessage}`);
+      
+      // Set a fallback quote if there's an error
+      const fallbackQuote: Quote = {
+        text: "The only way to do great work is to love what you do.",
+        author: "Steve Jobs",
+        category: "motivation"
+      };
+      setQuote(fallbackQuote);
     } finally {
       setLoading(false);
     }
@@ -71,11 +107,16 @@ export default function QuoteOfTheDay() {
 
   const shareQuote = () => {
     if (quote) {
-      const text = `&quot;${quote.text}&quot; - ${quote.author}`;
+      const text = `"${quote.text}" - ${quote.author}`;
       if (navigator.share) {
         navigator.share({
           title: 'Quote of the Day',
           text: text,
+        }).catch(err => {
+          console.log('Share failed:', err);
+          // Fallback to clipboard
+          navigator.clipboard.writeText(text);
+          alert('Quote copied to clipboard!');
         });
       } else {
         navigator.clipboard.writeText(text);
@@ -99,27 +140,7 @@ export default function QuoteOfTheDay() {
     );
   }
 
-  if (error && !quote) {
-    return (
-      <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-2xl shadow-lg border border-red-500/30">
-        <div className="text-center">
-          <div className="text-red-400 mb-4">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <p className="text-red-300 mb-4">{error}</p>
-          <button
-            onClick={getNewQuote}
-            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // Show the quote even if there was an error (since we have fallback quotes)
   return (
     <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-slate-800/50 via-slate-700/30 to-slate-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-500/30">
       {/* Header */}
@@ -136,6 +157,15 @@ export default function QuoteOfTheDay() {
         </h1>
       </div>
 
+      {/* Error message (if any) */}
+      {error && (
+        <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+          <p className="text-yellow-300 text-sm text-center">
+            {error} (showing fallback quote)
+          </p>
+        </div>
+      )}
+
       {/* Quote Content */}
       {quote && (
         <div className="text-center mb-8">
@@ -145,7 +175,7 @@ export default function QuoteOfTheDay() {
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
             </svg>
             <blockquote className="text-xl md:text-2xl font-medium text-white leading-relaxed px-8 py-4">
-              &quot;{quote.text}&quot;
+              "{quote.text}"
             </blockquote>
             <svg className="absolute -bottom-4 -right-4 w-8 h-8 text-purple-500/30 rotate-180" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z" />
@@ -177,7 +207,8 @@ export default function QuoteOfTheDay() {
 
         <button
           onClick={shareQuote}
-          className="flex items-center justify-center px-6 py-3 bg-slate-800/50 text-purple-300 border-2 border-purple-500/50 rounded-lg hover:bg-slate-700/50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105 shadow-lg"
+          disabled={!quote}
+          className="flex items-center justify-center px-6 py-3 bg-slate-800/50 text-purple-300 border-2 border-purple-500/50 rounded-lg hover:bg-slate-700/50 hover:border-purple-400 transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
@@ -186,7 +217,7 @@ export default function QuoteOfTheDay() {
         </button>
       </div>
 
-      {/* Today&apos;s Date */}
+      {/* Today's Date */}
       <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
         <p className="text-gray-400 text-sm">
           {new Date().toLocaleDateString('en-US', {
@@ -195,7 +226,6 @@ export default function QuoteOfTheDay() {
             month: 'long',
             day: 'numeric'
           })}
-
         </p>
       </div>
     </div>
