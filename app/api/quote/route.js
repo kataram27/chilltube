@@ -1,89 +1,55 @@
 // app/api/quote/route.js
 
-export async function POST() {
-  console.log('=== QUOTE API CALLED ===');
+export async function POST(request) {
+  const startTime = Date.now();
+  console.log('\n=== QUOTE API CALLED ===');
   
   try {
-    // Get environment variables with NEXT_PUBLIC_ prefix
+    // Step 1: Parse request (optional)
+    let requestData = {};
+    try {
+      const body = await request.text();
+      if (body) {
+        requestData = JSON.parse(body);
+      }
+    } catch (e) {
+      // Ignore request body parsing errors
+    }
+    
+    // Step 2: Get environment variables
     const apiKey = process.env.NEXT_PUBLIC_AZURE_API_KEY;
     const endpoint = process.env.NEXT_PUBLIC_AZURE_ENDPOINT;
     
-    console.log('Environment check:');
-    console.log('- API Key exists:', !!apiKey);
-    console.log('- Endpoint exists:', !!endpoint);
+    console.log('🔍 Environment Check:');
+    console.log('  - API Key exists:', !!apiKey);
+    console.log('  - API Key length:', apiKey?.length || 0);
+    console.log('  - API Key first 8 chars:', apiKey?.substring(0, 8) || 'NONE');
+    console.log('  - Endpoint exists:', !!endpoint);
+    console.log('  - Endpoint:', endpoint || 'NONE');
     
     if (!apiKey) {
-      console.error('❌ Missing NEXT_PUBLIC_AZURE_API_KEY');
-      // Return fallback quote instead of error
+      console.error('❌ MISSING API KEY');
       return new Response(JSON.stringify({
-        text: "The only way to do great work is to love what you do.",
-        author: "Steve Jobs",
-        category: "motivation"
+        error: 'Missing NEXT_PUBLIC_AZURE_API_KEY in environment',
+        debug: {
+          hasApiKey: false,
+          envKeys: Object.keys(process.env).filter(k => k.includes('AZURE')),
+          timestamp: new Date().toISOString()
+        }
       }), {
-        status: 200,
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
     if (!endpoint) {
-      console.error('❌ Missing NEXT_PUBLIC_AZURE_ENDPOINT');
+      console.error('❌ MISSING ENDPOINT');
       return new Response(JSON.stringify({
-        text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-        author: "Winston Churchill",
-        category: "courage"
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    console.log('✅ Making request to Azure OpenAI...');
-
-    // Add randomness to ensure different quotes each time
-    const categories = ['motivation', 'wisdom', 'success', 'life', 'inspiration', 'creativity', 'courage', 'perseverance', 'leadership', 'happiness'];
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    const randomSeed = Math.floor(Math.random() * 1000);
-    
-    const requestBody = {
-      messages: [
-        {
-          role: "system",
-          content: "You are a quote generator. You must respond with ONLY valid JSON in this exact format: {\"text\": \"quote text here\", \"author\": \"Author Name\", \"category\": \"motivation\"}. Do not include any other text, explanations, or formatting. Just the JSON. Generate a unique, inspiring quote each time."
-        },
-        {
-          role: "user",
-          content: `Generate a unique inspirational quote about ${randomCategory}. Make it different from common quotes. Include the author and category. Seed: ${randomSeed}`
-        }
-      ],
-      max_tokens: 200,
-      temperature: 0.9,  // Higher temperature for more creativity
-      top_p: 0.95,
-      presence_penalty: 0.6,  // Encourage new content
-      frequency_penalty: 0.3   // Reduce repetition
-    };
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': apiKey,
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    console.log('Azure API response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Azure API error:', response.status, errorText);
-      
-      // If API fails, return an error instead of fallback so user knows what happened
-      return new Response(JSON.stringify({
-        error: `Azure API failed: ${response.status} - ${errorText}`,
-        fallback: {
-          text: "The future belongs to those who believe in the beauty of their dreams.",
-          author: "Eleanor Roosevelt",
-          category: "inspiration"
+        error: 'Missing NEXT_PUBLIC_AZURE_ENDPOINT in environment',
+        debug: {
+          hasEndpoint: false,
+          envKeys: Object.keys(process.env).filter(k => k.includes('AZURE')),
+          timestamp: new Date().toISOString()
         }
       }), {
         status: 500,
@@ -91,87 +57,200 @@ export async function POST() {
       });
     }
 
-    const data = await response.json();
-    console.log('Azure API response data:', data);
+    // Step 3: Create request parameters
+    const timestamp = Date.now();
+    const randomSeed = Math.floor(Math.random() * 1000000);
+    const requestNumber = requestData.requestNumber || 1;
+    
+    console.log('🎯 Request Parameters:');
+    console.log('  - Timestamp:', timestamp);
+    console.log('  - Random Seed:', randomSeed);
+    console.log('  - Request Number:', requestNumber);
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid response structure from Azure API');
+    // Step 4: Prepare Azure request
+    const azureRequest = {
+      messages: [
+        {
+          role: "system",
+          content: "You are a quote generator. You MUST respond with ONLY valid JSON in this exact format: {\"text\": \"quote text\", \"author\": \"Author Name\", \"category\": \"motivation\"}. No other text, no explanations, no markdown. Just pure JSON."
+        },
+        {
+          role: "user",
+          content: `Create a unique inspirational quote. Make it completely different from any previous quotes. Request: ${requestNumber}, Seed: ${randomSeed}, Time: ${timestamp}`
+        }
+      ],
+      max_tokens: 150,
+      temperature: 1.0,
+      top_p: 0.9,
+      presence_penalty: 1.5,
+      frequency_penalty: 1.5
+    };
+
+    console.log('📤 Making Azure Request:');
+    console.log('  - Endpoint:', endpoint);
+    console.log('  - Temperature:', azureRequest.temperature);
+    console.log('  - Max Tokens:', azureRequest.max_tokens);
+
+    // Step 5: Call Azure API
+    const azureResponse = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify(azureRequest),
+    });
+
+    console.log('📥 Azure Response:');
+    console.log('  - Status:', azureResponse.status);
+    console.log('  - Status Text:', azureResponse.statusText);
+    console.log('  - Headers:', Object.fromEntries(azureResponse.headers.entries()));
+
+    // Step 6: Handle response
+    if (!azureResponse.ok) {
+      const errorText = await azureResponse.text();
+      console.error('❌ Azure API Error:');
+      console.error('  - Status:', azureResponse.status);
+      console.error('  - Error Text:', errorText);
+      
       return new Response(JSON.stringify({
-        text: "Innovation distinguishes between a leader and a follower.",
-        author: "Steve Jobs",
-        category: "leadership"
+        error: `Azure API returned ${azureResponse.status}`,
+        details: errorText,
+        debug: {
+          endpoint: endpoint,
+          hasValidKey: apiKey?.length === 32,
+          requestParams: { timestamp, randomSeed, requestNumber },
+          timestamp: new Date().toISOString()
+        }
       }), {
-        status: 200,
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    let content = data.choices[0].message.content.trim();
-    console.log('Raw AI response:', content);
+    // Step 7: Parse Azure response
+    const azureData = await azureResponse.json();
+    console.log('✅ Azure Response Data:');
+    console.log('  - Choices available:', !!azureData.choices);
+    console.log('  - Choices length:', azureData.choices?.length || 0);
+    console.log('  - First choice exists:', !!azureData.choices?.[0]);
+    console.log('  - Message exists:', !!azureData.choices?.[0]?.message);
+    console.log('  - Content exists:', !!azureData.choices?.[0]?.message?.content);
 
-    // Clean up the response - remove any markdown formatting
-    content = content.replace(/```json\n?|\n?```/g, '').trim();
-    
-    // Remove any text before the first { or after the last }
-    const jsonStart = content.indexOf('{');
-    const jsonEnd = content.lastIndexOf('}');
-    
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      content = content.substring(jsonStart, jsonEnd + 1);
+    if (!azureData.choices?.[0]?.message?.content) {
+      console.error('❌ Invalid Azure response structure');
+      console.error('Full response:', JSON.stringify(azureData, null, 2));
+      
+      return new Response(JSON.stringify({
+        error: 'Invalid response structure from Azure',
+        debug: {
+          azureResponse: azureData,
+          timestamp: new Date().toISOString()
+        }
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
+    // Step 8: Extract and clean content
+    let content = azureData.choices[0].message.content.trim();
+    console.log('📝 Raw AI Content:', content);
+
+    // Clean up the content
+    content = content.replace(/```json\n?|\n?```/g, '').trim();
+    
+    // Try to extract JSON if it's wrapped in other text
+    const jsonMatch = content.match(/\{[^}]*\}/);
+    if (jsonMatch) {
+      content = jsonMatch[0];
+    }
+
+    console.log('🧹 Cleaned Content:', content);
+
+    // Step 9: Parse the quote
     let quote;
     try {
       quote = JSON.parse(content);
-      console.log('Successfully parsed quote:', quote);
+      console.log('✅ Parsed Quote:', quote);
     } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.error('Content that failed to parse:', content);
+      console.error('❌ JSON Parse Error:', parseError.message);
+      console.error('Content that failed:', content);
       
-      // Return fallback quote
-      quote = {
-        text: "The best time to plant a tree was 20 years ago. The second best time is now.",
-        author: "Chinese Proverb",
-        category: "wisdom"
-      };
+      return new Response(JSON.stringify({
+        error: 'Failed to parse AI response as JSON',
+        debug: {
+          rawContent: content,
+          parseError: parseError.message,
+          timestamp: new Date().toISOString()
+        }
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    // Validate quote structure
-    if (!quote || typeof quote !== 'object' || !quote.text || !quote.author || !quote.category) {
-      console.warn('Invalid quote structure, using fallback');
-      quote = {
-        text: "Believe you can and you're halfway there.",
-        author: "Theodore Roosevelt",
-        category: "motivation"
-      };
+    // Step 10: Validate quote structure
+    if (!quote || typeof quote !== 'object') {
+      console.error('❌ Quote is not an object:', quote);
+      return new Response(JSON.stringify({
+        error: 'Quote is not a valid object',
+        debug: { quote, timestamp: new Date().toISOString() }
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    // Ensure all fields are strings and not empty
-    quote = {
-      text: String(quote.text || "Life is what happens to you while you're busy making other plans."),
-      author: String(quote.author || "John Lennon"),
-      category: String(quote.category || "life")
+    if (!quote.text || !quote.author || !quote.category) {
+      console.error('❌ Quote missing required fields:', quote);
+      return new Response(JSON.stringify({
+        error: 'Quote missing required fields (text, author, category)',
+        debug: { quote, timestamp: new Date().toISOString() }
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Step 11: Create final quote
+    const finalQuote = {
+      text: String(quote.text).trim(),
+      author: String(quote.author).trim(),
+      category: String(quote.category).trim().toLowerCase(),
+      meta: {
+        requestNumber: requestNumber,
+        timestamp: timestamp,
+        processingTime: Date.now() - startTime
+      }
     };
 
-    console.log('✅ Final quote being returned:', quote);
+    console.log('🎉 SUCCESS! Final Quote:', finalQuote);
+    console.log(`⏱️  Total processing time: ${Date.now() - startTime}ms\n`);
 
-    return new Response(JSON.stringify(quote), {
+    return new Response(JSON.stringify(finalQuote), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Processing-Time': `${Date.now() - startTime}ms`
+      }
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error in quote API:', error);
+    console.error('❌ UNEXPECTED ERROR:', error);
+    console.error('Error stack:', error.stack);
     
-    // Always return a working quote, never an error
-    const fallbackQuote = {
-      text: "The only impossible journey is the one you never begin.",
-      author: "Tony Robbins",
-      category: "motivation"
-    };
-    
-    return new Response(JSON.stringify(fallbackQuote), {
-      status: 200,
+    return new Response(JSON.stringify({
+      error: 'Unexpected server error',
+      details: error.message,
+      debug: {
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - startTime
+      }
+    }), {
+      status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }

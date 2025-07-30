@@ -4,128 +4,128 @@ interface Quote {
   text: string;
   author: string;
   category: string;
+  meta?: {
+    requestNumber: number;
+    timestamp: number;
+    processingTime: number;
+  };
 }
 
 export default function QuoteOfTheDay() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [requestCount, setRequestCount] = useState(0);
 
   const fetchQuote = async () => {
     setLoading(true);
     setError(null);
+    setDebugInfo(null);
+
+    const requestNumber = requestCount + 1;
+    const requestId = Math.random().toString(36).substring(7);
+    
+    console.log(`\n🚀 STARTING QUOTE REQUEST #${requestNumber}`);
+    console.log('Request ID:', requestId);
 
     try {
-      console.log('Fetching quote from /api/quote...');
-
       const response = await fetch('/api/quote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          requestNumber: requestNumber,
+          requestId: requestId,
+          timestamp: Date.now()
+        })
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
+      console.log('📡 Response received:');
+      console.log('  - Status:', response.status);
+      console.log('  - OK:', response.ok);
 
-      // Even if status is not 200, try to get the response as JSON
-      // because our API always returns a valid quote
       const responseText = await response.text();
-      console.log('Raw response:', responseText);
+      console.log('📄 Raw response:', responseText);
 
       if (!responseText) {
         throw new Error('Empty response from server');
       }
 
-      let quoteData: Quote;
+      let responseData;
       try {
-        const jsonData = JSON.parse(responseText);
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response as JSON:', parseError);
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
+      }
+
+      // Check if it's an error response
+      if (responseData.error) {
+        console.error('❌ API returned error:', responseData.error);
+        setError(responseData.error);
+        setDebugInfo(responseData.debug);
         
-        // Check if response contains an error (API failure)
-        if (jsonData.error) {
-          console.error('API returned error:', jsonData.error);
-          
-          // Use fallback if provided, otherwise create one
-          if (jsonData.fallback) {
-            quoteData = jsonData.fallback as Quote;
-            setError('API temporarily unavailable, showing cached quote');
-          } else {
-            throw new Error(jsonData.error);
-          }
-        } else {
-          quoteData = jsonData as Quote;
-        }
-        
-        console.log('Parsed quote data:', quoteData);
-      } catch (parseError: unknown) {
-        console.error('JSON parse error:', parseError);
-        console.error('Response was:', responseText);
-        throw new Error('Invalid JSON response from server');
+        // Don't set a quote if there's an error
+        return;
       }
 
-      // Validate the quote structure
-      if (!quoteData || typeof quoteData !== 'object') {
-        throw new Error('Quote data is not an object');
+      // Validate quote structure
+      if (!responseData.text || !responseData.author || !responseData.category) {
+        console.error('❌ Invalid quote structure:', responseData);
+        throw new Error('Invalid quote structure received from API');
       }
 
-      if (!quoteData.text || !quoteData.author || !quoteData.category) {
-        console.warn('Invalid quote structure:', quoteData);
-        throw new Error('Invalid quote data structure');
-      }
-
-      // Clean up the quote data
-      const cleanQuote: Quote = {
-        text: String(quoteData.text).trim(),
-        author: String(quoteData.author).trim(),
-        category: String(quoteData.category).trim().toLowerCase()
+      const newQuote: Quote = {
+        text: responseData.text,
+        author: responseData.author,
+        category: responseData.category,
+        meta: responseData.meta
       };
 
-      console.log('✅ Setting quote:', cleanQuote);
-      setQuote(cleanQuote);
-      setError(null); // Clear any previous errors
+      console.log('✅ SUCCESS! Setting new quote:', newQuote);
+      setQuote(newQuote);
+      setRequestCount(requestNumber);
+      setError(null);
 
     } catch (err: unknown) {
-      console.error('Quote fetch failed:', err);
+      console.error('❌ Request failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(`Error: ${errorMessage}`);
+      setError(errorMessage);
       
-      // Set a fallback quote if there's an error
-      const fallbackQuote: Quote = {
-        text: "The only way to do great work is to love what you do.",
-        author: "Steve Jobs",
-        category: "motivation"
-      };
-      setQuote(fallbackQuote);
+      // Only set fallback on first load
+      if (requestNumber === 1 && !quote) {
+        const fallbackQuote: Quote = {
+          text: "The only way to do great work is to love what you do.",
+          author: "Steve Jobs",
+          category: "motivation"
+        };
+        setQuote(fallbackQuote);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const getNewQuote = () => {
+    console.log('\n🔄 USER CLICKED NEW QUOTE');
     fetchQuote();
   };
 
   const shareQuote = () => {
     if (quote) {
       const text = `"${quote.text}" - ${quote.author}`;
-      if (navigator.share) {
-        navigator.share({
-          title: 'Quote of the Day',
-          text: text,
-        }).catch(err => {
-          console.log('Share failed:', err);
-          // Fallback to clipboard
-          navigator.clipboard.writeText(text);
-          alert('Quote copied to clipboard!');
-        });
-      } else {
-        navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text).then(() => {
         alert('Quote copied to clipboard!');
-      }
+      }).catch(() => {
+        alert('Unable to copy quote');
+      });
     }
   };
 
   useEffect(() => {
+    console.log('🎬 Component mounted - fetching initial quote');
     fetchQuote();
   }, []);
 
@@ -134,13 +134,14 @@ export default function QuoteOfTheDay() {
       <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-2xl shadow-lg border border-purple-500/30">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading inspiring quote...</p>
+          <p className="text-gray-300">
+            {requestCount === 0 ? 'Loading inspiring quote...' : `Generating quote #${requestCount + 1}...`}
+          </p>
         </div>
       </div>
     );
   }
 
-  // Show the quote even if there was an error (since we have fallback quotes)
   return (
     <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-slate-800/50 via-slate-700/30 to-slate-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-500/30">
       {/* Header */}
@@ -155,14 +156,34 @@ export default function QuoteOfTheDay() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 bg-clip-text text-transparent">
           Quote of the Day
         </h1>
+        {requestCount > 0 && (
+          <p className="text-gray-400 text-sm mt-2">
+            Quote #{requestCount} 
+            {quote?.meta && ` • Generated in ${quote.meta.processingTime}ms`}
+          </p>
+        )}
       </div>
 
-      {/* Error message (if any) */}
-      {error && (
-        <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
-          <p className="text-yellow-300 text-sm text-center">
-            {error} (showing fallback quote)
-          </p>
+      {/* Debug Info */}
+      {(error || debugInfo) && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <h3 className="text-red-300 font-semibold mb-2">🐛 Debug Information</h3>
+          {error && (
+            <div className="mb-3">
+              <p className="text-red-200 text-sm"><strong>Error:</strong> {error}</p>
+            </div>
+          )}
+          {debugInfo && (
+            <div className="text-xs text-gray-300 bg-gray-800/50 p-2 rounded">
+              <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+            </div>
+          )}
+          <button
+            onClick={getNewQuote}
+            className="mt-3 px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+          >
+            Try Again
+          </button>
         </div>
       )}
 
@@ -202,7 +223,7 @@ export default function QuoteOfTheDay() {
           <svg className={`w-5 h-5 mr-2 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          {loading ? 'Loading...' : 'New Quote'}
+          {loading ? 'Generating...' : 'New Quote'}
         </button>
 
         <button
@@ -217,7 +238,7 @@ export default function QuoteOfTheDay() {
         </button>
       </div>
 
-      {/* Today's Date */}
+      {/* Debug Console */}
       <div className="text-center mt-6 pt-6 border-t border-slate-700/50">
         <p className="text-gray-400 text-sm">
           {new Date().toLocaleDateString('en-US', {
@@ -226,6 +247,9 @@ export default function QuoteOfTheDay() {
             month: 'long',
             day: 'numeric'
           })}
+        </p>
+        <p className="text-purple-400 text-xs mt-1">
+          💡 Check browser console (F12) for detailed debug logs
         </p>
       </div>
     </div>
