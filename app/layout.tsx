@@ -1,6 +1,7 @@
 import './globals.css'
 import Script from 'next/script'
 import { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: 'My Next.js App with AdSense',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body>
         {children}
+        <Analytics />
       </body>
     </html>
   )
